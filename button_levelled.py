@@ -43,6 +43,11 @@ class ShiftRegister:
             self.write(d, False)
             print("{:0>8b}".format(d))
             time.sleep_ms(self.replay_ms)
+            
+            
+    def fill(self, num=8):
+        d = 0 | (0b11111111>>num)
+        self.write(d)
         
 
 
@@ -111,12 +116,10 @@ def us_measure():
             ld = 255
         else:
             ld = int(d)
-        num_led = msb(ld)
+        num_led = 7 - msb(ld)
         if num_led < 0:
             num_led = 0
-        d = (0b11111111>>num_led)
-        reg.write(d)
-        print(d)
+        reg.fill(num_led)
         time.sleep_ms(200)
 
 
@@ -138,7 +141,8 @@ if __name__ == "__main__":
     reg.write(0)
     us = UltraSonic(14, 15)
     
-    _thread.start_new_thread(us_measure,())
+    #_thread.start_new_thread(us_measure,())
     while True:
         internal_led.toggle()
+        reg.fill(random.randint(0,8))
         time.sleep(1)
