@@ -13,7 +13,7 @@ def start_radio():
     csn = Pin(cfg["csn"], mode=machine.Pin.OUT, value=1)
     ce = Pin(cfg["ce"], mode=machine.Pin.OUT, value=0)
     spi = cfg["spi"]
-    nrf = NRF24L01(spi, csn, ce, payload_size=4)
+    nrf = NRF24L01(spi, csn, ce, payload_size=16)
 
     nrf.open_tx_pipe(tx_pipe)
     nrf.open_rx_pipe(1, rx_pipe)
@@ -46,16 +46,25 @@ if __name__ == "__main__":
           while radio.any():
               buf = radio.recv()
               print(buf)
-              (direction, l_speed, r_speed,) = struct.unpack("iii", buf)
-          
-              if direction == 1:
-                  right.Forward(r_speed)
+              (l_direction, r_direction, l_speed, r_speed,) = struct.unpack("iiii", buf)
+              
+              if l_direction == 0:
+                  left.Stop()
+              if l_direction == 1:
                   left.Forward(l_speed)
-              if direction == 2:
-                  right.Reverse(r_speed)
+              if l_direction == 2:
                   left.Reverse(l_speed)
+              if r_direction == 0:
+                  right.Stop()
+              if r_direction == 1:
+                  right.Forward(r_speed)
+              if r_direction == 2:
+                  right.Reverse(r_speed)
+
         
         
+
+
 
 
 

@@ -1,4 +1,4 @@
-from zdevices import button
+from zdevices import button, joystick
 import struct
 import utime
 from machine import Pin, SPI
@@ -20,42 +20,49 @@ def radio():
     #nrf.start_listening()
     return nrf
 
-def send(direction, l_speed,r_speed):
+def send(l_direction, r_direction, l_speed,r_speed):
     try:
         radio.stop_listening()
         d = struct.pack("iii", direction, l_speed, r_speed)
         print("will send: " + str(d))
-        radio.send(struct.pack("iii", direction, l_speed, r_speed))
+        radio.send(struct.pack("iiii", l_direction, r_direction, l_speed, r_speed))
     except OSError as e:
         print("fail send")
     radio.start_listening()
 
 if __name__ == "__main__":
 
-    red = button.Button(16,"red")
-    yellow = button.Button(17,"yellow")
+    #red = button.Button(16,"red")
+    #yellow = button.Button(17,"yellow")
     
-    buttons = [red, yellow]
+    #buttons = [red, yellow]
+    
+    joystick = joystick.Joystick(26, 27, dz_slop=500)
     
     radio = radio()
     while True:
         l_speed = 0
         r_speed = 0
         direction = 0
-        for button in buttons:
-            if button.read():
-                print(button.label)
-                if button.label == "red":
-                    l_speed = 70
-                    r_speed = 70
-                    direction = 1
-                elif button.label == "yellow":
-                    l_speed = 70
-                    r_speed = 70
-                    direction = 2
-        send(direction, l_speed, r_speed)
+
         utime.sleep(.1)
+        x, x_dir = joystick.read_axis_for_motor("x", True)
+        y, y_dir = joystick.read_axis_for_motor("y", True)
+        
+        if y_dir > 0 and x_dir == 0: #forward or backwards
+            send(y_dir, y_dir, y,y)
+        elif x_dir == 1: #right turn
+            send(1, 2, x, x)
+        elif x_dir == 2: # left turn
+            send(2, 1, x, x )
             
+        else:
+            send(0, 0, 0, 0)
+        utime.sleep(.05)
+
+        
+
+          
         
                 
 
