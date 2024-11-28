@@ -1,6 +1,4 @@
 from machine import Pin,SPI
-from zdevices.dht11 import ZDHT11
-
 import framebuf
 import time
 
@@ -11,7 +9,6 @@ SCK = 10
 CS = 9
 
 
-dht11 = ZDHT11(18, "f")
 
 
 class OLED_1inch3(framebuf.FrameBuffer):
@@ -110,95 +107,125 @@ class OLED_1inch3(framebuf.FrameBuffer):
             for num in range(0,16):
                 self.write_data(self.buffer[page*16+num])
         
-class TextLine():
-    
-    def __init__(self, text, init_x, init_y):
-        if len (text) > 16:
-            raise Exception("line too long. 16 chars or less")
-        self.text = text
-        self.init_x = init_x
-        self.init_y = init_y
-        self.current_x = init_x
-        self.current_y = init_y
-        self.previous_x = init_x
-        self.previous_y = init_y
-        self.length = len(text)
-        
-        self.right_edge = init_x + (8 * len(text))
-        
-    def scroll_down(self, lines):
-        self.previous_y = self.current_y
-        self.current_y = self.current_y + (8 * lines)
-        if self.current_y > 64:
-            self.current_y = (self.current_y - 64)
-    
-    def scroll_up(self,lines):
-        self.previous_y = self.current_y
-        self.current_y = self.current_y - (8 * lines)
-        if self.current_y > 64:
-            self.current_y = (self.current_y - 64)
-    
-    def scroll_right(self, positions):
-        self.previous_x = self.current_x
-        self.current_x = self.current_x + (8 * positions)
-        if self.current_x > 128:
-            self.current_x = (self.current_x - 128)
-        
-
-    def right_blank(self):
-        x = self.right_edge
-        y = self.current_y
-        w = 8 * (16 - self.length)
-        h = 8
-        return (x, y, w , h, OLED.balck, True)
-    
-    def temporary_append(self, word):
-        if (len(word) + self.length) > 16:
-            raise Exception("word is too long")
-        return (word, self.right_edge + 8, self.current_y)
-    
-    def blank_previous_line(self):
-        x = 0
-        y = self.previous_y
-        w = 128
-        h = 8
-        return (x, y, w, h, OLED.balck, True)
-    
-    def buf_text(self):
-        return (self.text, self.current_x, self.current_y)
-    
-        
-
-
-        
+          
 if __name__=='__main__':
 
     OLED = OLED_1inch3()
     OLED.fill(0x0000) 
-
-    keyA = Pin(15,Pin.IN,Pin.PULL_UP)
-    keyB = Pin(17,Pin.IN,Pin.PULL_UP)
     OLED.show()
-    first_line = TextLine("stuff", 0, 0)
-    second_line = TextLine("things", first_line.init_x, first_line.init_y + 8)
-    lines = [first_line, second_line]
-
-    for line in lines:
-        OLED.text(*line.buf_text())
+    OLED.rect(0,0,128,64,OLED.white)
+    time.sleep(0.5)
+    OLED.show()
+    OLED.rect(10,22,20,20,OLED.white)
+    time.sleep(0.5)
+    OLED.show()
+    OLED.fill_rect(40,22,20,20,OLED.white)
+    time.sleep(0.5)
+    OLED.show()
+    OLED.rect(70,22,20,20,OLED.white)
+    time.sleep(0.5)
+    OLED.show()
+    OLED.fill_rect(100,22,20,20,OLED.white)
+    time.sleep(0.5)
+    OLED.show()
+    time.sleep(1)
+    
+    OLED.fill(0x0000)
+    OLED.line(0,0,5,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(0,0,20,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(0,0,35,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(0,0,65,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(0,0,95,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(0,0,125,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(0,0,125,41,OLED.white)
+    OLED.show()
+    time.sleep(0.1)
+    OLED.line(0,0,125,21,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(0,0,125,3,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    
+    OLED.line(127,1,125,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(127,1,110,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(127,1,95,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(127,1,65,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(127,1,35,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(127,1,1,64,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(127,1,1,44,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(127,1,1,24,OLED.white)
+    OLED.show()
+    time.sleep(0.01)
+    OLED.line(127,1,1,3,OLED.white)
+    OLED.show()
+    time.sleep(1)
+    OLED.fill(0x0000) 
+    OLED.text("128 x 64 Pixels",1,10,OLED.white)
+    OLED.text("Pico-OLED-1.3",1,27,OLED.white)
+    OLED.text("SH1107",1,44,OLED.white)  
     OLED.show()
     
-    while True:
-        for line in lines:
-            OLED.rect(*line.blank_previous_line())
-            line.scroll_down(2)
-            OLED.rect(*line.blank_previous_line())
-            line.scroll_right(2)
-            OLED.text(*line.buf_text())
+    time.sleep(1)
+    OLED.fill(0x0000) 
+    keyA = Pin(15,Pin.IN,Pin.PULL_UP)
+    keyB = Pin(17,Pin.IN,Pin.PULL_UP)
+    while(1):
+        if keyA.value() == 0:
+            if OLED.rotate == 0:
+                OLED.fill_rect(0,0,128,20,OLED.white)
+            else:
+                OLED.fill_rect(0,44,128,20,OLED.white)
+            print("A")
+        else :
+            if OLED.rotate == 0:
+                OLED.fill_rect(0,0,128,20,OLED.balck)
+            else:
+                OLED.fill_rect(0,44,128,20,OLED.balck)
+            
+            
+        if(keyB.value() == 0):
+            if OLED.rotate == 0:
+                OLED.fill_rect(0,44,128,20,OLED.white)
+            else:
+                OLED.fill_rect(0,0,128,20,OLED.white)
+            print("B")
+        else :
+            if OLED.rotate == 0:
+                OLED.fill_rect(0,44,128,20,OLED.balck)
+            else:
+                OLED.fill_rect(0,0,128,20,OLED.balck)
+        OLED.fill_rect(0,22,128,20,OLED.white)
+        OLED.text("press the button",0,28,OLED.balck)
+            
         OLED.show()
-        time.sleep(.2)
-
-        
-        
-
-
-
+    
+    
+    time.sleep(1)
+    OLED.fill(0xFFFF)
