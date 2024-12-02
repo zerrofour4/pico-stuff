@@ -1,5 +1,6 @@
 from machine import Pin,SPI
 from zdevices.dht11 import ZDHT11
+from zdevices.keypad import Keypad4x4
 
 import framebuf
 import time
@@ -156,6 +157,12 @@ class TextLine():
         if (len(word) + self.length) > 16:
             raise Exception("word is too long")
         return (word, self.right_edge + 8, self.current_y)
+
+    def append(self, word):
+        self.text = f"{self.text}{word}"
+        if (len(word) + self.length) > 16:
+            self.text = self.text[0:15]
+        self.length = len(self.text)
     
     def blank_previous_line(self):
         x = 0
@@ -163,6 +170,13 @@ class TextLine():
         w = 128
         h = 8
         return (x, y, w, h, OLED.balck, True)
+    
+    def blank_line(self):
+        self.current_x = 0
+        self.right_edge = 0
+        self.text = ""
+        self.length = 0
+        return self.right_blank()
     
     def buf_text(self):
         return (self.text, self.current_x, self.current_y)
@@ -172,30 +186,50 @@ class TextLine():
 
         
 if __name__=='__main__':
-
+    row_pins = [16,17,18,19]
+    col_pins = [20, 21, 22, 26]
+    k = Keypad4x4(row_pins, col_pins)
+    
+    
     OLED = OLED_1inch3()
     OLED.fill(0x0000) 
 
     keyA = Pin(15,Pin.IN,Pin.PULL_UP)
-    keyB = Pin(17,Pin.IN,Pin.PULL_UP)
     OLED.show()
     first_line = TextLine("stuff", 0, 0)
-    second_line = TextLine("things", first_line.init_x, first_line.init_y + 8)
-    lines = [first_line, second_line]
-
-    for line in lines:
-        OLED.text(*line.buf_text())
-    OLED.show()
-    
+    lines = []
+    for i in range(8):
+        lines.append(TextLine("", 0, 0 + (i * 8)))
+    last_key = None
+    line_index = 0
+    blank_next = False
     while True:
+        if keyA.value() == 0:
+            for line in lines:
+                OLED.rect(*line.blank_line())
+                OLED.text(*line.buf_text())
+            OLED.show()
+            continue
+        current_key = k.readKey()
+        if current_key == last_key:
+            continue
+        if lines[line_index].length == 16 and line_index == 7:
+            line_index = 0
+            OLED.rect(*lines[0].blank_line())
+        elif line_index < 7 and lines[line_index + 1].length == 16:
+            blank_next = True
+        elif lines[line_index].length == 16:
+            line_index += 1
+        if blank_next == True and lines[line_index].length == 16:
+            OLED.rect(*lines[line_index + 1].blank_line())
+            blank_next = False
+        lines[line_index].append("".join(current_key))
         for line in lines:
-            OLED.rect(*line.blank_previous_line())
-            line.scroll_down(2)
-            OLED.rect(*line.blank_previous_line())
-            line.scroll_right(2)
+            OLED.rect(*line.right_blank())
             OLED.text(*line.buf_text())
+
         OLED.show()
-        time.sleep(.2)
+        time.sleep(.05)
 
         
         
